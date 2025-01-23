@@ -7,12 +7,12 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UsersService } from './users.service';
 import { User as UserModel } from '@prisma/client';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Get('users/')
   async getUsers(): Promise<UserModel[]> {
@@ -28,12 +28,13 @@ export class UserController {
 
   @Post('users')
   async createUser(
-    @Body() postData: { email: string; name?: string },
+    @Body() postData: { email: string; name?: string; password: string },
   ): Promise<UserModel> {
-    const { email, name } = postData;
+    const { email, name, password } = postData;
     return this.userService.createUser({
       email,
       name,
+      password,
     });
   }
 
