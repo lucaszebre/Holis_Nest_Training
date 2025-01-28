@@ -58,7 +58,8 @@ export class UserController {
     });
   }
 
-  @Post('users')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post(['users', 'auth/register'])
   async createUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<UserModel | undefined> {
@@ -78,14 +79,29 @@ export class UserController {
       );
     }
 
-    if (email)
-      return this.userService.createUser({
-        email,
-        name,
-        password,
-      });
+    const user = await this.userService.createUser({
+      email,
+      name,
+      password,
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'Could register the new user',
+
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return new UserEntity({
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      name: user.name || '',
+    });
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Put('users/:id')
   async updateUser(
     @Param('id') id: string,
